@@ -1,0 +1,114 @@
+---
+title: "Reporte de transacciones por canales virtuales COAC Jardín Azuayo"
+author: "Omar Pinos"
+date: "2023-08-18"
+output: github_document
+---
+
+```{r libreriasanalizadastrabajo, echo=TRUE, message=FALSE, warning=FALSE, comment="", fig.align='center', fig.width=10, fig.height=7}
+
+library(dplyr)
+library(openxlsx)
+library(dygraphs)
+library(ggplot2)
+library(reshape2)
+library(gganimate)
+library(animation)
+library(forecast)
+library(lubridate)
+library(scales)
+
+```
+```{r databasetrabajar, echo=FALSE, message=FALSE, warning=FALSE, comment="", fig.align='center', fig.width=10, fig.height=7}
+
+data2 <- read.xlsx("D://Estructuras F01/Transacciones virtuales y contrataciones por canales COAC JA.xlsx", detectDates = T)
+
+magrupados4 <- melt(data2, id.vars = "Periodo")
+
+```
+
+```{r graficolineascanalesvirtuales, echo=FALSE,message=FALSE, warning=FALSE, comment="", fig.align='center', fig.width=10, fig.height=7}
+
+ggplot(data = magrupados4,
+       aes(x=Periodo, y=value))+
+       geom_line()+ facet_wrap(.~variable, scales = "free")+
+       theme(text = element_text(size = 12))
+
+```
+
+```{r graficosdinamicosavanzados, echo=FALSE,message=FALSE, warning=FALSE, comment="", fig.align='center', fig.width=8, fig.height=6}
+
+datady <- data2 %>%
+          select(Corresponsales,`Total_ATM´s`, JA.Pagos, Quiosco,Cashdro, JA.Movil, JA.Virtual)
+
+tsdata <- ts(datady, start = c(2019,1), frequency = 12)
+
+dygraph(tsdata, main = "Evolución de las transacciones en canales virtuales",
+        xlab = "Perido", ylab = "Número de transacciones")%>%
+        dyOptions(fillGraph = T, fillAlpha = 0.04,
+        drawPoints = T, pointSize = 3)
+
+
+```
+
+```{r graficosdintotales, echo=FALSE,message=FALSE, warning=FALSE, comment="", fig.align='center', fig.width=8, fig.height=5}
+
+datady <- data2 %>%
+          select(Total.contrataciones, Total.Virtuales)
+
+tsdata <- ts(datady, start = c(2019,1), frequency = 12)
+
+dygraph(tsdata, main = "Evolución de las transacciones y contrataciones virtuales",
+        xlab = "Perido", ylab = "Número de transacciones")%>%
+        dyOptions(fillGraph = T, fillAlpha = 0.04,
+        drawPoints = T, pointSize = 3)
+
+
+```
+
+
+# Se aprecia que las transacciones virtuales han tenido un crecimiento importante. A continuación se presenta la proyección para 5 meses en el cual el modelo estima que a diciembre del 2023 se llegue a un total de 1.135.536 transacciones
+
+```{r otrainformaciónimportante, echo=FALSE,message=FALSE, warning=FALSE, comment="", fig.align='center', fig.width=8, fig.height=5, results='asis'}
+
+modelopred <- auto.arima(data2$Total.Virtuales)
+fmodelopred <- forecast(modelopred,5)
+autoplot(fmodelopred)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
